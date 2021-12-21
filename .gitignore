@@ -1,0 +1,9 @@
+*.pyc
+__pycache__
+
+.coverage
+htmlcov
+
+prof
+
+celerybeat-schedule

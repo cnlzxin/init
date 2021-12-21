@@ -1,0 +1,49 @@
+version: "3.5"
+
+services:
+  project:
+    container_name: project
+    image: project:${VERSION}     # 环境变量值来自 .env 文件
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: always
+    environment:
+      - VERSION=${VERSION}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
+      - REDIS_PASSWD=${REDIS_PASSWD}
+    ports:
+      - 127.0.0.1:8000:8000       # 用于本地验证, 生产环境中会再起一个 Nginx 服务, 使用 Docker 内部网络进行通信
+    networks:
+      - database
+  beat:
+    container_name: beat
+    image: project:${VERSION}
+    restart: always
+    environment:
+      - VERSION=${VERSION}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
+      - REDIS_PASSWD=${REDIS_PASSWD}
+    networks:
+      - database
+    command: ['celery', '-A', 'tasks.celery', 'beat', '-l', 'info']
+  worker:
+    container_name: worker
+    image: project:${VERSION}
+    restart: always
+    environment:
+      - VERSION=${VERSION}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
+      - REDIS_PASSWD=${REDIS_PASSWD}
+    networks:
+      - database
+    command: ['celery', '-A', 'tasks.celery', 'worker', '-Q', 'calculate.something', '-P', 'eventlet', '-l', 'info']
+
+networks:
+  database:
+    name: database
+    driver: bridge
+    external: true

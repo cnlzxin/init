@@ -1,0 +1,45 @@
+version: '3.5'
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:3.6
+    restart: always
+    volumes:
+      - ./mongo:/data/db                            # 用于数据持久化
+    ports:
+      - 127.0.0.1:27017:27017                       # local develop
+    networks:
+      - database
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.7-management
+    restart: always
+    hostname: rabbitmq                              # 数据持久化
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit heartbeat 90
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    ports:
+      - 127.0.0.1:5672:5672                         # local develop
+      - 127.0.0.1:15672:15672                       # management
+    networks:
+      - database
+  redis:
+    container_name: redis
+    image: redis:3.2.10
+    restart: always
+    volumes:
+      - ./redis:/data
+    ports:
+      - 127.0.0.1:6379:6379                         # local develop
+    command: redis-server --requirepass "redis"     # config password
+    networks:
+      - database
+
+networks:
+  database:
+    name: database
+    driver: bridge
