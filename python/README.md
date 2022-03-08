@@ -71,6 +71,7 @@ $ pytest tests.py -v --profile
 
 # 运行环境
 
+```
 Python 3.6
 Flask 1.1
 MongoDB 3.6
@@ -82,6 +83,7 @@ Alpine 3.12                     # Docker 基础镜像环境
 
 RabbitMQ 3.7
 Redis 3.2.10
+```
 
 
 # 配置开发环境
